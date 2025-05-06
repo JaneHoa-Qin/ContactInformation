@@ -78,6 +78,22 @@
                 </ItemTemplate>
                 <EditItemTemplate>
                     <asp:TextBox ID="txtEmail" runat="server" Text='<%# Bind("Email") %>' />
+                    <asp:RequiredFieldValidator
+                        ID="rfvEmail"
+                        runat="server"
+                        ControlToValidate="txtEmail"
+                        ErrorMessage="Email required"
+                        Display="Dynamic"
+                        ForeColor="Red" />
+
+                    <asp:RegularExpressionValidator
+                        ID="revEmail"
+                        runat="server"
+                        ControlToValidate="txtEmail"
+                        ValidationExpression="^[^@\s]+@[^@\s]+\.[^@\s]+$"
+                        ErrorMessage="Invalid email format"
+                        Display="Dynamic"
+                        ForeColor="Red" />
                 </EditItemTemplate>
             </asp:TemplateField>
             <asp:CommandField ShowEditButton="true" ShowDeleteButton="true" />
@@ -94,6 +110,22 @@
         <asp:TextBox ID="txtNewState" runat="server" Placeholder="State" CssClass="add-input" />
         <asp:TextBox ID="txtNewCountry" runat="server" Placeholder="Country" CssClass="add-input" />
         <asp:TextBox ID="txtNewEmail" runat="server" Placeholder="Email" CssClass="add-input" />
+        <asp:RequiredFieldValidator
+            ID="rfvnewEmail"
+            runat="server"
+            ControlToValidate="txtNewEmail"
+            ErrorMessage="Email required"
+            Display="Dynamic"
+            ForeColor="Red" />
+
+        <asp:RegularExpressionValidator
+            ID="revnewEmail"
+            runat="server"
+            ControlToValidate="txtNewEmail"
+            ValidationExpression="^[^@\s]+@[^@\s]+\.[^@\s]+$"
+            ErrorMessage="Invalid email format"
+            Display="Dynamic"
+            ForeColor="Red" />
         <asp:Button ID="btnAddNew" runat="server" Text="Add Contact" OnClick="btnAddNew_Click" CssClass="add-button" />
     </div>
 </asp:Content>
