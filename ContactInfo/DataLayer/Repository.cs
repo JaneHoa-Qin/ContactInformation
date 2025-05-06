@@ -32,6 +32,25 @@ namespace ContactInfo.DataLayer
                 .ThenBy(c => c.LastName).ToList();
         }
 
+        public List<Model.Contact> GetContacts(int pageIndex, int pageSize, string sortColumn, string sortDirection, out int totalRecords)
+        {
+            var query = _dbContext.Contacts
+                        .Where(c => !string.IsNullOrEmpty(c.FirstName)); // filter out blanks if needed
+
+            totalRecords = query.Count();
+
+            if (!string.IsNullOrEmpty(sortColumn))
+            {
+                string orderBy = $"{sortColumn} {sortDirection}";
+                query = query.OrderBy(orderBy);
+            }
+
+            return query
+                .Skip(pageIndex * pageSize)
+                .Take(pageSize)
+                .ToList();
+        }
+
         #region
         //05/06/2025 (Jane Qin) Create get all contacts
         #endregion

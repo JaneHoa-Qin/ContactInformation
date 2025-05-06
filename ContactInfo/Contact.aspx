@@ -4,18 +4,27 @@
     <asp:GridView ID="gridService" runat="server" AutoGenerateColumns="false" GridLines="Both"
         DataKeyNames="id"
         CssClass="styled-gridview"
+        AllowSorting="True"
         AllowPaging="True"
         AllowCustomPaging="True"
         EnableViewState="true"
         PageSize="2"
         OnPageIndexChanging="gridService_PageIndexChanging"
+        OnSorting="gridService_Sorting"
         OnRowEditing="gridService_RowEditing"
         OnRowUpdating="gridService_RowUpdating"
         OnRowDeleting="gridService_RowDeleting"
         OnRowCancelingEdit="gridService_RowCancelingEdit">
         <Columns>
             <%-- <asp:BoundField DataField="id" HeaderText="ID" ReadOnly="true" />--%>
-            <asp:TemplateField HeaderText="First Name">               
+            <asp:TemplateField HeaderText="First Name" SortExpression="FirstName">
+                <HeaderTemplate>
+                    <asp:LinkButton runat="server"
+                        CommandName="Sort"
+                        CommandArgument="FirstName"
+                        Text='<%# GetSortIcon("FirstName", "First Name") %>'>
+                    </asp:LinkButton>
+                </HeaderTemplate>
                 <ItemTemplate>
                     <%# Eval("FirstName") %>
                 </ItemTemplate>

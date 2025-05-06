@@ -225,6 +225,10 @@
     <Compile Include="Migrations\202505052027182_Init.Designer.cs">
       <DependentUpon>202505052027182_Init.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202505062112380_AddEmailValidation.cs" />
+    <Compile Include="Migrations\202505062112380_AddEmailValidation.Designer.cs">
+      <DependentUpon>202505062112380_AddEmailValidation.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\Contact.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -267,6 +271,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202505052027182_Init.resx">
       <DependentUpon>202505052027182_Init.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202505062112380_AddEmailValidation.resx">
+      <DependentUpon>202505062112380_AddEmailValidation.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

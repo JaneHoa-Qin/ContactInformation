@@ -14,6 +14,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using ContactInfo.DataLayer;
 using System.Linq.Dynamic.Core;
+using System.ComponentModel.DataAnnotations;
 
 namespace ContactInfo
 {
@@ -47,24 +48,41 @@ namespace ContactInfo
         #endregion
         private void LoadContactsWithPaging(int pageIndex)
         {
-            using (var context = new ContactContext())
-            {
-                int totalRecords = context.Contacts
-                    .Where(c => !string.IsNullOrEmpty(c.FirstName)) // Example filter, adjust as needed
-                    .Count();
+            int totalRecords;
+            var data = _repository.GetContacts(
+                pageIndex,
+                gridService.PageSize,
+                SortColumn,
+                SortDirection,
+                out totalRecords);
 
-                var data = context.Contacts
-                                  .OrderBy(e => e.id)
-                                  .Skip(pageIndex * pageSize)
-                                  .Take(pageSize)
-                                  .ToList();
+            int maxPageIndex = (int)Math.Ceiling((double)totalRecords / gridService.PageSize) - 1;
+            if (pageIndex > maxPageIndex && maxPageIndex >= 0)
+                pageIndex = maxPageIndex;
 
-                gridService.DataSource = data;
-                gridService.VirtualItemCount = totalRecords; // This is key for paging buttons
-                gridService.PageIndex = pageIndex;
-                gridService.DataBind();
+            gridService.DataSource = data;
+            gridService.VirtualItemCount = totalRecords;
+            gridService.PageIndex = pageIndex;
+            gridService.DataBind();
 
-            }
+            //using (var context = new ContactContext())
+            //{
+            //    int totalRecords = context.Contacts
+            //        .Where(c => !string.IsNullOrEmpty(c.FirstName)) // Example filter, adjust as needed
+            //        .Count();
+
+            //    var data = context.Contacts
+            //                      .OrderBy(e => e.id)
+            //                      .Skip(pageIndex * pageSize)
+            //                      .Take(pageSize)
+            //                      .ToList();
+
+            //    gridService.DataSource = data;
+            //    gridService.VirtualItemCount = totalRecords; // This is key for paging buttons
+            //    gridService.PageIndex = pageIndex;
+            //    gridService.DataBind();
+
+            //}
         }
 
         #region
@@ -169,8 +187,11 @@ namespace ContactInfo
                 Email = email
             };
 
-            _repository.AddContact(newContact);
-            _repository.Save();
+          
+                _repository.AddContact(newContact);
+                _repository.Save();
+           
+
 
             // Reload the last page of contacts after adding a new one
             int totalRecords = _repository.GetTotalContactsCount();
@@ -186,5 +207,45 @@ namespace ContactInfo
             txtNewCountry.Text = string.Empty;
             txtNewEmail.Text = string.Empty;
         }
+
+        #region
+        protected string SortColumn
+        {
+            get => ViewState["SortColumn"] as string ?? "FirstName";
+            set => ViewState["SortColumn"] = value;
+        }
+
+        protected string SortDirection
+        {
+            get => ViewState["SortDirection"] as string ?? "ASC";
+            set => ViewState["SortDirection"] = value;
+        }
+
+        protected string GetSortIcon(string column, string displayText)
+        {
+            if (SortColumn != column)
+                return displayText;
+
+            string arrow = SortDirection == "ASC" ? " ▲" : " ▼";
+            return displayText + arrow;
+        }
+
+        protected void gridService_Sorting(object sender, GridViewSortEventArgs e)
+        {
+            if (SortColumn == e.SortExpression)
+            {
+                SortDirection = SortDirection == "ASC" ? "DESC" : "ASC";
+            }
+            else
+            {
+                SortColumn = e.SortExpression;
+                SortDirection = "ASC";
+            }
+
+            LoadContactsWithPaging(gridService.PageIndex);
+        }
+
+        #endregion
+
     }
 }
