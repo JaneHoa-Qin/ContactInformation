@@ -116,6 +116,7 @@
             ControlToValidate="txtNewEmail"
             ErrorMessage="Email required"
             Display="Dynamic"
+            ValidationGroup="AddGroup"
             ForeColor="Red" />
 
         <asp:RegularExpressionValidator
@@ -124,8 +125,9 @@
             ControlToValidate="txtNewEmail"
             ValidationExpression="^[^@\s]+@[^@\s]+\.[^@\s]+$"
             ErrorMessage="Invalid email format"
+            ValidationGroup="AddGroup"
             Display="Dynamic"
             ForeColor="Red" />
-        <asp:Button ID="btnAddNew" runat="server" Text="Add Contact" OnClick="btnAddNew_Click" CssClass="add-button" />
+        <asp:Button ID="btnAddNew" runat="server" Text="Add Contact" OnClick="btnAddNew_Click" CssClass="add-button" ValidationGroup="AddGroup" />
     </div>
 </asp:Content>

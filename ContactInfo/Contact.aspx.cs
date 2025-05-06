@@ -3,6 +3,7 @@
 //05/05/2025 (Jane Qin) btnAddNew_Click: Reload the last page of contacts after adding a new one, change the load function to LoadContactsWithPaging
 //05/06/2025 (Jane Qin) Create server-side paging for the GridView, LoadContactsWithPaging/gridService_PageIndexChanging
 //05/06/2025 (Jane Qin) gridService_RowEditing/gridService_RowUpdating/gridService_RowDeleting/gridService_RowCancelingEdit: change the load function to LoadContactsWithPaging
+//05/06/2025 (Jane Qin) Sorting by FirstName, added Email validation client-side
 #endregion
 
 using System;
@@ -15,6 +16,7 @@ using System.Web.UI.WebControls;
 using ContactInfo.DataLayer;
 using System.Linq.Dynamic.Core;
 using System.ComponentModel.DataAnnotations;
+using ContactInfo.Model;
 
 namespace ContactInfo
 {
@@ -64,25 +66,6 @@ namespace ContactInfo
             gridService.VirtualItemCount = totalRecords;
             gridService.PageIndex = pageIndex;
             gridService.DataBind();
-
-            //using (var context = new ContactContext())
-            //{
-            //    int totalRecords = context.Contacts
-            //        .Where(c => !string.IsNullOrEmpty(c.FirstName)) // Example filter, adjust as needed
-            //        .Count();
-
-            //    var data = context.Contacts
-            //                      .OrderBy(e => e.id)
-            //                      .Skip(pageIndex * pageSize)
-            //                      .Take(pageSize)
-            //                      .ToList();
-
-            //    gridService.DataSource = data;
-            //    gridService.VirtualItemCount = totalRecords; // This is key for paging buttons
-            //    gridService.PageIndex = pageIndex;
-            //    gridService.DataBind();
-
-            //}
         }
 
         #region
@@ -128,7 +111,7 @@ namespace ContactInfo
                 State = state,
                 Country = country,
                 Email = email
-            };
+            };         
 
             _repository.UpdateContact(contact); // Ensure UpdateContact exists in Repository
             _repository.Save();
@@ -187,11 +170,9 @@ namespace ContactInfo
                 Email = email
             };
 
-          
-                _repository.AddContact(newContact);
+            _repository.AddContact(newContact);
                 _repository.Save();
            
-
 
             // Reload the last page of contacts after adding a new one
             int totalRecords = _repository.GetTotalContactsCount();
@@ -209,6 +190,7 @@ namespace ContactInfo
         }
 
         #region
+        //05/06/2025 (Jane Qin) Sorting by FirstName
         protected string SortColumn
         {
             get => ViewState["SortColumn"] as string ?? "FirstName";
