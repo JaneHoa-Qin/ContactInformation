@@ -4,13 +4,18 @@
     <asp:GridView ID="gridService" runat="server" AutoGenerateColumns="false" GridLines="Both"
         DataKeyNames="id"
         CssClass="styled-gridview"
+        AllowPaging="True"
+        AllowCustomPaging="True"
+        EnableViewState="true"
+        PageSize="2"
+        OnPageIndexChanging="gridService_PageIndexChanging"
         OnRowEditing="gridService_RowEditing"
         OnRowUpdating="gridService_RowUpdating"
         OnRowDeleting="gridService_RowDeleting"
         OnRowCancelingEdit="gridService_RowCancelingEdit">
         <Columns>
-           <%-- <asp:BoundField DataField="id" HeaderText="ID" ReadOnly="true" />--%>
-            <asp:TemplateField HeaderText="First Name">
+            <%-- <asp:BoundField DataField="id" HeaderText="ID" ReadOnly="true" />--%>
+            <asp:TemplateField HeaderText="First Name">               
                 <ItemTemplate>
                     <%# Eval("FirstName") %>
                 </ItemTemplate>

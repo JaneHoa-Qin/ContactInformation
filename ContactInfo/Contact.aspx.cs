@@ -1,21 +1,26 @@
 ﻿#region
-  //05/05/2025 (Jane Qin) Create 
+//05/05/2025 (Jane Qin) Create 
+//05/05/2025 (Jane Qin) btnAddNew_Click: Reload the last page of contacts after adding a new one, change the load function to LoadContactsWithPaging
+//05/06/2025 (Jane Qin) Create server-side paging for the GridView, LoadContactsWithPaging/gridService_PageIndexChanging
+//05/06/2025 (Jane Qin) gridService_RowEditing/gridService_RowUpdating/gridService_RowDeleting/gridService_RowCancelingEdit: change the load function to LoadContactsWithPaging
 #endregion
 
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Core.Common.CommandTrees;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using ContactInfo.DataLayer;
+using System.Linq.Dynamic.Core;
 
 namespace ContactInfo
 {
     public partial class Contact : Page
     {
         private readonly Repository _repository = new Repository(new ContactContext());
-
+        private int pageSize = 2;
         #region
         //05/05/2025 (Jane Qin) Create 
         #endregion
@@ -23,7 +28,7 @@ namespace ContactInfo
         {
             if (!IsPostBack)
             {
-                LoadContacts();
+                LoadContactsWithPaging(0);
             }
         }
 
@@ -38,16 +43,50 @@ namespace ContactInfo
         }
 
         #region
+        //05/06/2025 (Jane Qin) Create server-side paging for the GridView
+        #endregion
+        private void LoadContactsWithPaging(int pageIndex)
+        {
+            using (var context = new ContactContext())
+            {
+                int totalRecords = context.Contacts
+                    .Where(c => !string.IsNullOrEmpty(c.FirstName)) // Example filter, adjust as needed
+                    .Count();
+
+                var data = context.Contacts
+                                  .OrderBy(e => e.id)
+                                  .Skip(pageIndex * pageSize)
+                                  .Take(pageSize)
+                                  .ToList();
+
+                gridService.DataSource = data;
+                gridService.VirtualItemCount = totalRecords; // This is key for paging buttons
+                gridService.PageIndex = pageIndex;
+                gridService.DataBind();
+
+            }
+        }
+
+        #region
+        //05/06/2025 (Jane Qin) Create server-side paging for the GridView
+        #endregion
+        protected void gridService_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        {
+            LoadContactsWithPaging(e.NewPageIndex);
+        }
+        #region
         //05/05/2025 (Jane Qin) Create  function to activate TextBox of the selected row 
+        //05/06/2025 (Jane Qin) change the load function to LoadContactsWithPaging
         #endregion
         protected void gridService_RowEditing(object sender, GridViewEditEventArgs e)
         {
             gridService.EditIndex = e.NewEditIndex;
-            LoadContacts();
+            LoadContactsWithPaging(gridService.PageIndex);
         }
 
         #region
         //05/05/2025 (Jane Qin) Create  function to edit the selected record
+        //05/06/2025 (Jane Qin) change the load function to LoadContactsWithPaging
         #endregion
         protected void gridService_RowUpdating(object sender, GridViewUpdateEventArgs e)
         {
@@ -76,11 +115,12 @@ namespace ContactInfo
             _repository.UpdateContact(contact); // Ensure UpdateContact exists in Repository
             _repository.Save();
             gridService.EditIndex = -1;
-            LoadContacts();
+            LoadContactsWithPaging(gridService.PageIndex);
         }
 
         #region
         //05/05/2025 (Jane Qin) Create  function to delete the selected record
+        //05/06/2025 (Jane Qin) change the load function to LoadContactsWithPaging
         #endregion
         protected void gridService_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
@@ -91,20 +131,22 @@ namespace ContactInfo
                 _repository.DeleteContact(contact);
                 _repository.Save();
             }
-            LoadContacts();
+            LoadContactsWithPaging(0);
         }
 
         #region
         //05/05/2025 (Jane Qin) Create  function to cancel the editing
+        //05/06/2025 (Jane Qin) change the load function to LoadContactsWithPaging
         #endregion
         protected void gridService_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
         {
             gridService.EditIndex = -1;
-            LoadContacts();
+            LoadContactsWithPaging(gridService.PageIndex);
         }
 
         #region
         //05/05/2025 (Jane Qin) Create  function to add new record
+        //05/06/2025 (Jane Qin) Reload the last page of contacts after adding a new one, change the load function to LoadContactsWithPaging
         #endregion
         protected void btnAddNew_Click(object sender, EventArgs e)
         {
@@ -129,7 +171,11 @@ namespace ContactInfo
 
             _repository.AddContact(newContact);
             _repository.Save();
-            LoadContacts();
+
+            // Reload the last page of contacts after adding a new one
+            int totalRecords = _repository.GetTotalContactsCount();
+            int lastPageIndex = (int)Math.Floor((double)(totalRecords - 1) / pageSize);
+            LoadContactsWithPaging(lastPageIndex);
 
             // Clear the input fields
             txtNewFirstName.Text = string.Empty;
@@ -140,6 +186,5 @@ namespace ContactInfo
             txtNewCountry.Text = string.Empty;
             txtNewEmail.Text = string.Empty;
         }
-
     }
 }

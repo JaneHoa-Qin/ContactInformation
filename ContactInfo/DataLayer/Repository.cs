@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Linq.Dynamic.Core;
 
 namespace ContactInfo.DataLayer
 {
@@ -29,6 +30,16 @@ namespace ContactInfo.DataLayer
             return _dbContext.Contacts
                 .OrderBy(c => c.FirstName)
                 .ThenBy(c => c.LastName).ToList();
+        }
+
+        #region
+        //05/06/2025 (Jane Qin) Create get all contacts
+        #endregion
+        public int GetTotalContactsCount()
+        {
+            return _dbContext.Contacts
+                .Where(c => !string.IsNullOrEmpty(c.FirstName)) // filter out empty first names
+                .Count();
         }
 
         #region
