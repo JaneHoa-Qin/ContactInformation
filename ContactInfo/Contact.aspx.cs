@@ -4,6 +4,7 @@
 //05/06/2025 (Jane Qin) Create server-side paging for the GridView, LoadContactsWithPaging/gridService_PageIndexChanging
 //05/06/2025 (Jane Qin) gridService_RowEditing/gridService_RowUpdating/gridService_RowDeleting/gridService_RowCancelingEdit: change the load function to LoadContactsWithPaging
 //05/06/2025 (Jane Qin) Sorting by FirstName, added Email validation client-side
+//05/08/2025 (Jane Qin) Add try/catch block to handle exceptions in LoadContactsWithPaging and btnAddNew_Click
 #endregion
 
 using System;
@@ -23,7 +24,12 @@ namespace ContactInfo
     public partial class Contact : Page
     {
         private readonly Repository _repository = new Repository(new ContactContext());
-        private int pageSize = 2;
+        private int PageSize
+        {
+            get => ViewState["PageSize"] != null ? (int)ViewState["PageSize"] : 2;
+            set => ViewState["PageSize"] = value;
+        }
+
         #region
         //05/05/2025 (Jane Qin) Create 
         #endregion
@@ -31,6 +37,7 @@ namespace ContactInfo
         {
             if (!IsPostBack)
             {
+                ddlPageSize.SelectedValue = PageSize.ToString();
                 LoadContactsWithPaging(0);
             }
         }
@@ -50,31 +57,42 @@ namespace ContactInfo
         #endregion
         private void LoadContactsWithPaging(int pageIndex)
         {
-            int totalRecords;
-            var data = _repository.GetContacts(
-                pageIndex,
-                gridService.PageSize,
-                SortColumn,
-                SortDirection,
-                out totalRecords);
+            try
+            {
+                int totalRecords;
+                var data = _repository.GetContacts(
+                    pageIndex,
+                    gridService.PageSize,
+                    SortColumn,
+                    SortDirection,
+                    out totalRecords);
 
-            int maxPageIndex = (int)Math.Ceiling((double)totalRecords / gridService.PageSize) - 1;
-            if (pageIndex > maxPageIndex && maxPageIndex >= 0)
-                pageIndex = maxPageIndex;
-
-            gridService.DataSource = data;
-            gridService.VirtualItemCount = totalRecords;
-            gridService.PageIndex = pageIndex;
-            gridService.DataBind();
+                gridService.VirtualItemCount = totalRecords;
+                gridService.PageIndex = pageIndex;
+                gridService.PageSize = PageSize; // update GridView
+                gridService.DataSource = data;
+                gridService.DataBind();
+            }
+            catch (Exception ex)
+            {
+                lblError.Text = $"An error occurred while loading contacts. {ex.Message}";
+            }
         }
 
         #region
-        //05/06/2025 (Jane Qin) Create server-side paging for the GridView
-        #endregion
+            //05/06/2025 (Jane Qin) Create server-side paging for the GridView
+            #endregion
         protected void gridService_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             LoadContactsWithPaging(e.NewPageIndex);
         }
+
+        protected void ddlPageSize_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            PageSize = int.Parse(ddlPageSize.SelectedValue);
+            LoadContactsWithPaging(0); // go back to first page
+        }
+
         #region
         //05/05/2025 (Jane Qin) Create  function to activate TextBox of the selected row 
         //05/06/2025 (Jane Qin) change the load function to LoadContactsWithPaging
@@ -169,12 +187,19 @@ namespace ContactInfo
                 Country = country,
                 Email = email
             };
-
-            _repository.AddContact(newContact);
+            try
+            {
+                _repository.AddContact(newContact);
                 _repository.Save();
-           
+            }
+            catch (Exception ex)
+            {
+                lblError.Text = $"An error occurred while adding the contact. {ex.Message}";
+                return;
+            }
 
             // Reload the last page of contacts after adding a new one
+            int pageSize = int.Parse(ddlPageSize.SelectedValue);
             int totalRecords = _repository.GetTotalContactsCount();
             int lastPageIndex = (int)Math.Floor((double)(totalRecords - 1) / pageSize);
             LoadContactsWithPaging(lastPageIndex);

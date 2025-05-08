@@ -1,6 +1,12 @@
 ﻿<%@ Page Title="Contact" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Contact.aspx.cs" Inherits="ContactInfo.Contact" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+    <asp:DropDownList ID="ddlPageSize" runat="server" AutoPostBack="true"
+        OnSelectedIndexChanged="ddlPageSize_SelectedIndexChanged">
+        <asp:ListItem Text="2" Value="2" />
+        <asp:ListItem Text="5" Value="5" />      
+    </asp:DropDownList>
+
     <asp:GridView ID="gridService" runat="server" AutoGenerateColumns="false" GridLines="Both"
         DataKeyNames="id"
         CssClass="styled-gridview"
@@ -130,4 +136,5 @@
             ForeColor="Red" />
         <asp:Button ID="btnAddNew" runat="server" Text="Add Contact" OnClick="btnAddNew_Click" CssClass="add-button" ValidationGroup="AddGroup" />
     </div>
+    <asp:Label ID="lblError" runat="server" ForeColor="Red" EnableViewState="false" />
 </asp:Content>

@@ -45,6 +45,9 @@ namespace ContactInfo.DataLayer
                 query = query.OrderBy(orderBy);
             }
 
+            // Assume pageSize = 10, pageIndex = 2
+            //Skip(pageIndex * pageSize) → Skip(2 * 10) → Skip 20, Take(pageSize) → Take(10)
+            // Skip 20 records and take the next 10 records
             return query
                 .Skip(pageIndex * pageSize)
                 .Take(pageSize)
